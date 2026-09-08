@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 export function useAudioAnalysis() {
   const recRef = useRef<MediaRecorder | null>(null);
   const chunks = useRef<Blob[]>([]);
+  const startedAt = useRef<number | null>(null);
   const [result, setResult] = useState<any>(null);
 
   const startRecording = (stream: MediaStream): Promise<boolean> => {
@@ -49,6 +50,7 @@ export function useAudioAnalysis() {
 
         rec.start(1000);
         recRef.current = rec;
+        startedAt.current = performance.now();
         console.log("Recording started successfully");
         resolve(true);
       } catch (e) {
@@ -87,10 +89,19 @@ export function useAudioAnalysis() {
           setResult(data);
           resolve(data);
         } catch (e) {
-          console.error("Upload error:", e);
-          resolve(null);
+          console.warn("Audio backend unavailable; continuing with local session results.", e);
+          resolve({
+            words_per_minute: 0,
+            filler_count: 0,
+            voice_confidence: 0,
+            transcript: "Audio analysis is unavailable in local-only mode.",
+            duration_seconds: startedAt.current
+              ? Math.round((performance.now() - startedAt.current) / 1000)
+              : 0,
+          });
         } finally {
           recRef.current = null;
+          startedAt.current = null;
         }
       };
 

@@ -22,6 +22,9 @@ export class PoseAnalyzer {
       },
       runningMode: "VIDEO",
       numPoses: 1,
+      minPoseDetectionConfidence: 0.3,
+      minPosePresenceConfidence: 0.3,
+      minTrackingConfidence: 0.3,
     });
   }
 

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { usePoseAnalysis } from "../../hooks/usePoseAnalysis";
 import { useEyeContact } from "../../hooks/useEyeContact";
 import { useEmotionDetection } from "../../hooks/useEmotionDetection";
+import { useGestureAnalysis } from "../../hooks/useGestureAnalysis";
 import { useAudioAnalysis } from "../../hooks/useAudioAnalysis";
 import LiveMetrics from "../../components/session/LiveMetrics";
 import SessionControls from "../../components/session/SessionControls";
@@ -20,6 +21,7 @@ export default function SessionPage() {
     const { start, stop } = usePoseAnalysis(videoRef);
     const { emotion } = useEmotionDetection(videoRef);
     const { lookingAtScreen } = useEyeContact(videoRef);
+    useGestureAnalysis(videoRef);
     const { startRecording, stopAndAnalyze } = useAudioAnalysis();
     const { setMetric, setFeedback } = useSessionStore();
 
@@ -69,6 +71,23 @@ export default function SessionPage() {
         setMetric("transcript", audio.transcript);
 
         const state = useSessionStore.getState();
+        const localSession = {
+            id: Date.now(),
+            created_at: new Date().toISOString(),
+            duration_seconds: audio.duration_seconds ?? 0,
+            overall_score: Math.round(
+                (state.postureScore +
+                    state.eyeContactPercent +
+                    state.engagementScore +
+                    (100 - state.fidgetScore)) / 4
+            ),
+            posture_score: state.postureScore,
+            eye_contact_percent: state.eyeContactPercent,
+            words_per_minute: audio.words_per_minute,
+            coaching_feedback: null,
+        };
+        const previousSessions = JSON.parse(localStorage.getItem("fluent-ai-sessions") ?? "[]");
+        localStorage.setItem("fluent-ai-sessions", JSON.stringify([localSession, ...previousSessions].slice(0, 20)));
         try {
             const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
             const res = await fetch(
@@ -83,7 +102,11 @@ export default function SessionPage() {
             setFeedback(feedback);
             router.push("/dashboard");
         } catch (err) {
-            console.error("Failed to request AI feedback:", err);
+            console.warn("AI coaching backend unavailable; using local feedback.", err);
+            setFeedback(
+                "Your browser completed the session locally. Connect the optional Fluent AI backend to receive transcript-based coaching."
+            );
+            router.push("/dashboard");
         }
     };
 

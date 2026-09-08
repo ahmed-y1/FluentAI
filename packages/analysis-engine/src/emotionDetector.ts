@@ -21,7 +21,10 @@ export class EmotionDetector {
 
   async analyze(video: HTMLVideoElement): Promise<EmotionResult | null> {
     const detection = await faceapi
-      .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+      .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({
+        inputSize: 416,
+        scoreThreshold: 0.25,
+      }))
       .withFaceExpressions();
     if (!detection) return null;
 

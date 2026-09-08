@@ -22,6 +22,9 @@ export class GestureMonitor {
       },
       runningMode: "VIDEO",
       numHands: 2,
+      minHandDetectionConfidence: 0.3,
+      minHandPresenceConfidence: 0.3,
+      minTrackingConfidence: 0.3,
     });
   }
 
@@ -33,7 +36,9 @@ export class GestureMonitor {
       this.prevPos = [];
       return { handsDetected:0, movementIntensity:0, fidgetScore:0, feedback:"No hands detected." };
     }
-    const curr = result.landmarks.map(h => ({ x: h[0].x, y: h[0].y }));
+    const curr = result.landmarks
+      .map(h => ({ x: h[0].x, y: h[0].y }))
+      .sort((a, b) => a.x - b.x);
     let totalMove = 0;
     if (this.prevPos.length === curr.length) {
       for (let i = 0; i < curr.length; i++) {

@@ -33,12 +33,22 @@ export function useEyeContact(videoRef: React.RefObject<HTMLVideoElement | null>
     const loop = () => {
       frame.current = requestAnimationFrame(loop);
       if (!tracker.current) return;
-      if (!videoRef.current || isAnalyzing.current) return;
+
+      const video = videoRef.current;
+      if (
+        !video ||
+        isAnalyzing.current ||
+        video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA ||
+        video.videoWidth === 0 ||
+        video.videoHeight === 0
+      ) {
+        return;
+      }
 
       isAnalyzing.current = true;
       try {
         const timestamp = performance.now();
-        const analysisResult = tracker.current.analyze(videoRef.current, timestamp);
+        const analysisResult = tracker.current.analyze(video, timestamp);
         setResult(analysisResult);
         setLookingAtScreen(analysisResult.isLookingAtCamera);
         setMetric("eyeContactPercent", analysisResult.eyeContactPercent);

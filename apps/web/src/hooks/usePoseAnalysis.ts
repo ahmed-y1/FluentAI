@@ -31,9 +31,17 @@ useEffect(() => {
     }
 
     const loop = (ts: number) => {
-      if (videoRef.current && analyzer.current && isReady) {
+      const video = videoRef.current;
+      if (
+        video &&
+        analyzer.current &&
+        isReady &&
+        video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA &&
+        video.videoWidth > 0 &&
+        video.videoHeight > 0
+      ) {
         try {
-          const r = analyzer.current.analyze(videoRef.current, ts);
+          const r = analyzer.current.analyze(video, ts);
           setScore(r);
           setMetric("postureScore", r.overall);
         } catch (error) {
