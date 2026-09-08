@@ -1,15 +1,22 @@
 {
   "name": "fluent-ai",
+  "homepage": "https://ahmed-y1.github.io/FluentAI",
   "packageManager": "npm@10.8.2",
   "version": "1.0.0",
   "private": true,
-  "workspaces": ["apps/*", "packages/*"],
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
-    "test": "turbo run test"
+    "test": "turbo run test",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d apps/web/dist"
   },
   "devDependencies": {
+    "gh-pages": "^6.3.0",
     "turbo": "latest"
   }
 }
