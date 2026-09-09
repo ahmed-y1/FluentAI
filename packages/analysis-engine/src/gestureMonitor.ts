@@ -2,8 +2,9 @@ import { FilesetResolver, HandLandmarker } from "@mediapipe/tasks-vision";
 
 export interface GestureResult {
   handsDetected: number;
-  movementIntensity: number;  // 0–100
-  fidgetScore: number;        // 0–100 (higher = more distracting)
+  movementIntensity: number | null;
+  gestureActivity: number | null;
+  fidgetScore: number | null;
   feedback: string;
 }
 
@@ -11,6 +12,11 @@ export class GestureMonitor {
   private landmarker: HandLandmarker | null = null;
   private prevPos: {x:number, y:number}[] = [];
   private history: number[] = [];
+
+  reset() {
+    this.prevPos = [];
+    this.history = [];
+  }
 
   async init() {
     const vision = await FilesetResolver.forVisionTasks(
@@ -34,7 +40,7 @@ export class GestureMonitor {
     const handsDetected = result.landmarks?.length ?? 0;
     if (!handsDetected) {
       this.prevPos = [];
-      return { handsDetected:0, movementIntensity:0, fidgetScore:0, feedback:"No hands detected." };
+      return { handsDetected: 0, movementIntensity: null, gestureActivity: null, fidgetScore: null, feedback: "Hands unavailable." };
     }
     const curr = result.landmarks
       .map(h => ({ x: h[0].x, y: h[0].y }))
@@ -52,10 +58,11 @@ export class GestureMonitor {
     if (this.history.length > 90) this.history.shift();
     const avg = this.history.reduce((a,b) => a+b, 0) / this.history.length;
     const movementIntensity = Math.min(100, avg * 2000);
-    const fidgetScore = movementIntensity > 60 ? movementIntensity : 0;
+    const gestureActivity = movementIntensity;
+    const fidgetScore = movementIntensity > 60 ? movementIntensity : Math.max(0, movementIntensity - 45) * 0.35;
     let feedback = "Hand gestures look natural.";
     if (fidgetScore > 70) feedback = "Hands moving too much — try to keep them calmer.";
     else if (movementIntensity < 5) feedback = "Consider adding gestures to emphasise key points.";
-    return { handsDetected, movementIntensity, fidgetScore, feedback };
+    return { handsDetected, movementIntensity, gestureActivity, fidgetScore, feedback };
   }
 }

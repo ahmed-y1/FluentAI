@@ -4,7 +4,7 @@ export function useAudioAnalysis() {
   const recRef = useRef<MediaRecorder | null>(null);
   const chunks = useRef<Blob[]>([]);
   const startedAt = useRef<number | null>(null);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<Record<string, unknown> | null>(null);
 
   const startRecording = (stream: MediaStream): Promise<boolean> => {
     if (recRef.current && recRef.current.state !== "inactive") {
@@ -64,7 +64,7 @@ export function useAudioAnalysis() {
     });
   };
 
-  const stopAndAnalyze = (): Promise<any> =>
+  const stopAndAnalyze = (): Promise<Record<string, unknown> | null> =>
     new Promise((resolve) => {
       // If recorder was never started, return immediately
       if (!recRef.current || recRef.current.state === "inactive") {
@@ -86,15 +86,18 @@ export function useAudioAnalysis() {
           if (!res.ok) throw new Error("Backend upload failed");
           
           const data = await res.json();
-          setResult(data);
-          resolve(data);
+          const result = { ...data, audio_available: true };
+          setResult(result);
+          resolve(result);
         } catch (e) {
-          console.warn("Audio backend unavailable; continuing with local session results.", e);
+          console.warn("Audio backend unavailable; speech metrics will be marked unavailable.", e);
           resolve({
-            words_per_minute: 0,
-            filler_count: 0,
-            voice_confidence: 0,
-            transcript: "Audio analysis is unavailable in local-only mode.",
+            words_per_minute: null,
+            filler_count: null,
+            voice_confidence: null,
+            transcript: "",
+            audio_available: false,
+            audio_error: "Speech analysis is unavailable because the backend could not be reached.",
             duration_seconds: startedAt.current
               ? Math.round((performance.now() - startedAt.current) / 1000)
               : 0,

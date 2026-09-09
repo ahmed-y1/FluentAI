@@ -26,7 +26,7 @@ export default function SessionHistory({ sessions }: { sessions: S[] }) {
                             </p>
                             <p className="text-gray-400 text-xs">{Math.ceil(s.duration_seconds / 60)} min session</p>
                         </div>
-                        <p className="text-2xl font-semibold" style={{ color: s.overall_score >= 75 ? "#34d399" : s.overall_score >= 50 ? "#fb923c" : "#f87171" }}>
+                        <p className="text-2xl font-semibold" style={{ color: s.overall_score >= 75 ? "#6366F1" : s.overall_score >= 50 ? "#818CF8" : "#0F172A" }}>
                             {Math.round(s.overall_score)}
                         </p>
                     </div>

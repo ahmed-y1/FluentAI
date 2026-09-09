@@ -1,7 +1,14 @@
+import os
 import httpx
 
-OLLAMA_URL = "http://localhost:11434/api/generate"
-MODEL = "llama3.2:3b"
+OLLAMA_URL = os.getenv("FLUENTAI_LLM_URL", "http://localhost:11434/api/generate")
+MODEL = os.getenv("FLUENTAI_LLM_MODEL", "llama3.2:3b")
+
+def get_llm_status() -> str:
+    return "configured" if os.getenv("FLUENTAI_LLM_URL") else "development-only"
+
+def display_metric(value, suffix=""):
+    return f"{value:.0f}{suffix}" if isinstance(value, (int, float)) else "unavailable"
 
 SYSTEM = """
 You are Fluent AI, an expert communication coach. Give feedback in this exact format:
@@ -15,13 +22,13 @@ Be warm, encouraging, specific. Under 250 words total.
 async def generate_coaching_feedback(session: dict) -> str:
     prompt = f"""
 Session metrics:
-- Posture: {session.get("posture_score",0):.0f}/100
-- Eye Contact: {session.get("eye_contact_percent",0):.0f}%
-- Engagement: {session.get("engagement_score",0):.0f}/100
-- Words/min: {session.get("words_per_minute",0):.0f} (ideal: 120-160)
+- Posture: {display_metric(session.get("posture_score"))}/100
+- Eye Contact: {display_metric(session.get("eye_contact_percent"))}%
+- Presence: {display_metric(session.get("presence_score", session.get("engagement_score")))}/100
+- Words/min: {display_metric(session.get("words_per_minute"))} (ideal: 120-160)
 - Filler words: {session.get("filler_count",0)} times
-- Voice confidence: {session.get("voice_confidence",0):.0f}/100
-- Monotone: {"Yes" if session.get("is_monotone") else "No"}
+- Voice projection: {display_metric(session.get("voice_projection", session.get("voice_confidence")))}/100
+- Monotone: {"Yes" if session.get("is_monotone") else "No" if session.get("is_monotone") is not None else "unavailable"}
 
 Transcript: \"{session.get("transcript","")[:400]}\"
 

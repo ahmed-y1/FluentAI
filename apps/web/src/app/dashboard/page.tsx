@@ -8,7 +8,7 @@ import CoachingCard from "../../components/dashboard/CoachingCard";
 import { getSavedSessions, SavedSession } from "../../lib/sessionStorage";
 
 function MetricCard({ label, value, unit = "%" }: { label: string; value: number; unit?: string }) {
-    const color = value >= 75 ? "#34d399" : value >= 50 ? "#fb923c" : "#f87171";
+    const color = value >= 75 ? "#6366F1" : value >= 50 ? "#818CF8" : "#0F172A";
     return (
         <div className="dashboard-metric">
             <p className="text-xs text-gray-400 mb-1">{label}</p>

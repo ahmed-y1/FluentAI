@@ -36,9 +36,9 @@ export default function ScoreChart({ sessions }: Props) {
                     <YAxis domain={[0, 100]} tick={{ fill: "#99f6e4", fontSize: 12 }} />
                     <Tooltip contentStyle={{ background: "#072327", border: "1px solid #114a52", borderRadius: 8, color: "#ccfbf1" }} />
                     <Legend wrapperStyle={{ color: "#99f6e4", fontSize: 12 }} />
-                    <Line type="monotone" dataKey="overall" stroke="#2dd4bf" strokeWidth={2} dot={false} name="Overall" />
-                    <Line type="monotone" dataKey="posture" stroke="#34d399" strokeWidth={2} dot={false} name="Posture" />
-                    <Line type="monotone" dataKey="eyeContact" stroke="#378ADD" strokeWidth={2} dot={false} name="Eye Contact" />
+                    <Line type="monotone" dataKey="overall" stroke="#6366F1" strokeWidth={2} dot={false} name="Overall" />
+                    <Line type="monotone" dataKey="posture" stroke="#818CF8" strokeWidth={2} dot={false} name="Posture" />
+                    <Line type="monotone" dataKey="eyeContact" stroke="#F8FAFC" strokeWidth={2} dot={false} name="Eye Contact" />
                 </LineChart>
             </ResponsiveContainer>
         </div>

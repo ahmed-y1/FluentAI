@@ -5,4 +5,5 @@ module.exports = {
     '@mediapipe/tasks-vision': '<rootDir>/__mocks__/mediapipe.ts',
     'face-api.js':             '<rootDir>/__mocks__/face-api.ts',
   },
+  testPathIgnorePatterns: ['/node_modules/', '<rootDir>/dist/'],
 };

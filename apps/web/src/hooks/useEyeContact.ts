@@ -50,7 +50,7 @@ export function useEyeContact(videoRef: React.RefObject<HTMLVideoElement | null>
         const timestamp = performance.now();
         const analysisResult = tracker.current.analyze(video, timestamp);
         setResult(analysisResult);
-        setLookingAtScreen(analysisResult.isLookingAtCamera);
+        setLookingAtScreen(analysisResult.isLookingAtCamera ?? false);
         setMetric("eyeContactPercent", analysisResult.eyeContactPercent);
       } catch (error) {
         console.error("[EyeContact] Analysis error:", error);

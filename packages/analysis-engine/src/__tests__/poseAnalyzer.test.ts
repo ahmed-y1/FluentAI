@@ -1,11 +1,12 @@
 import { PoseAnalyzer } from "../poseAnalyzer";
 
 describe("PoseAnalyzer", () => {
-  it("returns zero scores when no pose detected", async () => {
+  it("returns unavailable scores when no pose detected", async () => {
     const a = new PoseAnalyzer(); await a.init();
     const r = a.analyze({} as HTMLVideoElement, 0);
-    expect(r.overall).toBe(0);
-    expect(r.feedback).toContain("No pose detected");
+    expect(r.overall).toBeNull();
+    expect(r.available).toBe(false);
+    expect(r.feedback).toContain("Pose unavailable");
   });
 
   it("shoulderBalance formula: level shoulders = 100", () => {

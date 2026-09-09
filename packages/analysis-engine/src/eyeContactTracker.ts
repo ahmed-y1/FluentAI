@@ -1,9 +1,11 @@
 import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
 
 export interface EyeContactResult {
-  isLookingAtCamera: boolean;
-  gazeScore: number;        // 0–100
-  eyeContactPercent: number; // rolling % over session
+  isLookingAtCamera: boolean | null;
+  gazeScore: number | null;
+  eyeContactPercent: number | null;
+  faceDetected: boolean;
+  state: "LOOKING_AT_SCREEN" | "LOOKING_AWAY" | "NO_FACE";
 }
 
 export class EyeContactTracker {
@@ -31,7 +33,7 @@ export class EyeContactTracker {
     if (!this.landmarker) throw new Error("EyeContactTracker not initialized");
     const result = this.landmarker.detectForVideo(video, timestamp);
     if (!result.faceLandmarks?.length) {
-      return { isLookingAtCamera: false, gazeScore: 0, eyeContactPercent: this.rolling() };
+      return { isLookingAtCamera: null, gazeScore: null, eyeContactPercent: this.rolling(), faceDetected: false, state: "NO_FACE" };
     }
     const landmarks = result.faceLandmarks[0];
     const point = (index: number) => landmarks[index];
@@ -66,11 +68,11 @@ export class EyeContactTracker {
     const looking = gazeScore > 55;
     this.history.push(looking);
     if (this.history.length > 300) this.history.shift();
-    return { isLookingAtCamera: looking, gazeScore, eyeContactPercent: this.rolling() };
+    return { isLookingAtCamera: looking, gazeScore, eyeContactPercent: this.rolling(), faceDetected: true, state: looking ? "LOOKING_AT_SCREEN" : "LOOKING_AWAY" };
   }
 
   private rolling() {
-    if (!this.history.length) return 0;
+    if (!this.history.length) return null;
     return (this.history.filter(Boolean).length / this.history.length) * 100;
   }
 
