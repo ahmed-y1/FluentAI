@@ -132,7 +132,7 @@ export default function SessionPage() {
     };
 
     return (
-        <div className="flex h-screen bg-gray-950">
+        <div className="presentation-session">
             <div className="flex-1 relative">
                 <video ref={videoRef} autoPlay muted playsInline
                     className="w-full h-full object-cover" />

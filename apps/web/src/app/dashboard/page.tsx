@@ -32,7 +32,7 @@ export default function DashboardPage() {
     }));
 
     return (
-        <main className="dashboard-page">
+        <main className="dashboard-page presentation-page">
             <div className="dashboard-shell">
                 <section className="dashboard-hero">
                     <div>
