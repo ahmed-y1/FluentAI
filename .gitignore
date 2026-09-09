@@ -1,6 +1,14 @@
 node_modules/
 .next/
+out/
 dist/
+coverage/
+test-results/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+*.tsbuildinfo
 venv/
 .turbo/
 *.log

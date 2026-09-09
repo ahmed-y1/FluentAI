@@ -4,22 +4,7 @@ import { useEffect, useState } from "react";
 import ScoreChart from "../../components/dashboard/ScoreChart";
 import SessionHistory from "../../components/dashboard/SessionHistory";
 import CoachingCard from "../../components/dashboard/CoachingCard";
-
-async function getSessions(userId: string) {
-    const localSessions = JSON.parse(localStorage.getItem("fluent-ai-sessions") ?? "[]");
-    try {
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-        const res = await fetch(
-            `${baseUrl}/api/sessions/${userId}`,
-            { cache: "no-store" }
-        );
-        if (!res.ok) return localSessions;
-        return res.json();
-    } catch (e) {
-        console.warn("Dashboard backend unavailable; showing local sessions.", e);
-        return localSessions;
-    }
-}
+import { getSavedSessions } from "../../lib/sessionStorage";
 
 function MetricCard({ label, value, unit = "%" }: { label: string; value: number; unit?: string }) {
     const color = value >= 75 ? "#34d399" : value >= 50 ? "#fb923c" : "#f87171";
@@ -35,7 +20,7 @@ export default function DashboardPage() {
     const [sessions, setSessions] = useState<any[]>([]);
 
     useEffect(() => {
-        getSessions("demo-user").then(setSessions);
+        setSessions(getSavedSessions());
     }, []);
 
     const chartData = [...sessions].reverse().map((s: any) => ({

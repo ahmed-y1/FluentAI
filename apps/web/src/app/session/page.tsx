@@ -9,6 +9,7 @@ import { useAudioAnalysis } from "../../hooks/useAudioAnalysis";
 import LiveMetrics from "../../components/session/LiveMetrics";
 import SessionControls from "../../components/session/SessionControls";
 import { useSessionStore } from "../../store/sessionStore";
+import { saveSession } from "../../lib/sessionStorage";
 
 export default function SessionPage() {
     const router = useRouter();
@@ -86,8 +87,8 @@ export default function SessionPage() {
             words_per_minute: audio.words_per_minute,
             coaching_feedback: null,
         };
-        const previousSessions = JSON.parse(localStorage.getItem("fluent-ai-sessions") ?? "[]");
-        localStorage.setItem("fluent-ai-sessions", JSON.stringify([localSession, ...previousSessions].slice(0, 20)));
+
+        let coachingFeedback = "Your browser completed the session locally. Connect the optional Fluent AI backend to receive transcript-based coaching.";
         try {
             const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
             const res = await fetch(
@@ -99,15 +100,14 @@ export default function SessionPage() {
                 }
             );
             const { feedback } = await res.json();
-            setFeedback(feedback);
-            router.push("/dashboard");
+            coachingFeedback = feedback;
         } catch (err) {
             console.warn("AI coaching backend unavailable; using local feedback.", err);
-            setFeedback(
-                "Your browser completed the session locally. Connect the optional Fluent AI backend to receive transcript-based coaching."
-            );
-            router.push("/dashboard");
         }
+
+        setFeedback(coachingFeedback);
+        saveSession({ ...localSession, coaching_feedback: coachingFeedback });
+        router.push("/dashboard");
     };
 
     return (
