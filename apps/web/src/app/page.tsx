@@ -52,6 +52,6 @@ export default function Home() {
           <article className="step-item"><span className="step-number">03</span><h3>Try again</h3><p>Keep the useful feedback, leave the noise, and watch your confidence compound.</p></article>
         </div>
       </section>
-    </div>
+    </main>
   );
 }
