@@ -73,8 +73,8 @@ export default function SessionPage() {
         const durationSeconds = typeof audio.duration_seconds === "number" ? audio.duration_seconds : 0;
         const wordsPerMinute = typeof audio.words_per_minute === "number" ? audio.words_per_minute : null;
         const scores = [state.postureScore, state.eyeContactPercent, state.presenceScore,
-            state.fidgetScore === null ? null : 100 - state.fidgetScore,
-            wordsPerMinute === null ? null : paceScore(wordsPerMinute)]
+        state.fidgetScore === null ? null : 100 - state.fidgetScore,
+        wordsPerMinute === null ? null : paceScore(wordsPerMinute)]
             .filter((score): score is number => score !== null);
         const overallScore = scores.length ? Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length) : null;
         const localSession = {
