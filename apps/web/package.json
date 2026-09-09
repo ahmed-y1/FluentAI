@@ -19,7 +19,8 @@
     "react-dom": "19.2.4",
     "recharts": "^3.8.1",
     "socket.io-client": "^4.8.3",
-    "zustand": "^5.0.14"
+    "zustand": "^5.0.14",
+    "@fluent-ai/analysis-engine": "1.0.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",
