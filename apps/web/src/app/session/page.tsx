@@ -8,7 +8,10 @@ import SessionControls from "../../components/session/SessionControls";
 import { useSessionStore } from "../../store/sessionStore";
 import { saveSession } from "../../lib/sessionStorage";
 
-type SpeechRecognitionEventLike = Event & { results: { [index: number]: { [index: number]: { transcript: string } }; length: number } };
+type SpeechRecognitionEventLike = Event & {
+    resultIndex: number;
+    results: { [index: number]: { [index: number]: { transcript: string }; isFinal: boolean }; length: number };
+};
 type SpeechRecognitionLike = {
     lang: string; interimResults: boolean; continuous: boolean;
     start: () => void; stop: () => void;
@@ -25,6 +28,8 @@ export default function SessionPage() {
     const [startupError, setStartupError] = useState<string | null>(null);
     const [speechAvailable, setSpeechAvailable] = useState(true);
     const [liveTranscript, setLiveTranscript] = useState("");
+    const speechRunningRef = useRef(false);
+    const finalSpeechRef = useRef("");
 
     const { start, stop, isReady: analysisReady, initializing, error: analysisError } = useSessionAnalysisController(videoRef);
     const { startRecording, stopAndAnalyze } = useAudioAnalysis();
@@ -42,18 +47,29 @@ export default function SessionPage() {
         const recognition = new SpeechRecognition();
         recognition.continuous = true; recognition.interimResults = true;
         recognition.onresult = (event) => {
-            let finalText = ""; let interimText = "";
-            for (let index = 0; index < event.results.length; index += 1) {
+            let interimText = "";
+            for (let index = event.resultIndex; index < event.results.length; index += 1) {
                 const text = event.results[index][0]?.transcript ?? "";
-                if (index === event.results.length - 1) interimText += text; else finalText += text;
+                if (event.results[index].isFinal) {
+                    finalSpeechRef.current = `${finalSpeechRef.current} ${text}`.trim();
+                } else {
+                    interimText += text;
+                }
             }
-            const existing = useSessionStore.getState().transcript;
-            const next = finalText.trim() ? `${existing} ${finalText}`.trim() : existing;
-            setTranscript(next, interimText); setLiveTranscript(next);
+            setTranscript(finalSpeechRef.current, interimText);
+            setLiveTranscript(finalSpeechRef.current);
         };
-        recognition.onerror = () => setSpeechAvailable(false);
+        recognition.onerror = () => {
+            setSpeechAvailable(false);
+            speechRunningRef.current = false;
+        };
+        recognition.onend = () => {
+            if (speechRunningRef.current) {
+                try { recognition.start(); } catch { speechRunningRef.current = false; }
+            }
+        };
         speechRef.current = recognition;
-        return () => { recognition.stop(); speechRef.current = null; };
+        return () => { speechRunningRef.current = false; recognition.stop(); speechRef.current = null; };
     }, [setTranscript]);
 
     useEffect(() => { if (speechRef.current) speechRef.current.lang = language === "ar" ? "ar-SA" : language === "en" ? "en-US" : "en-US"; }, [language]);
@@ -104,8 +120,10 @@ export default function SessionPage() {
         stop();
         setPhase("processing");
 
+        speechRunningRef.current = false;
         speechRef.current?.stop();
-        const audio = await stopAndAnalyze(language, useSessionStore.getState().transcript);
+        const browserTranscript = finalSpeechRef.current || useSessionStore.getState().transcript;
+        const audio = await stopAndAnalyze(language, browserTranscript);
         if (!audio) {
             setStartupError("The session could not be finalized. Please try again.");
             return;
@@ -115,7 +133,7 @@ export default function SessionPage() {
         setMetric("fillerCount", typeof audio.filler_count === "number" ? audio.filler_count : null);
         setMetric("voiceConfidence", typeof audio.voice_confidence === "number" ? audio.voice_confidence : null);
         setMetric("transcript", typeof audio.transcript === "string" ? audio.transcript : "");
-        setTranscript(typeof audio.transcript === "string" ? audio.transcript : transcript, "");
+        setTranscript(typeof audio.transcript === "string" ? audio.transcript : browserTranscript, "");
 
         const state = useSessionStore.getState();
         const durationSeconds = typeof audio.duration_seconds === "number" ? audio.duration_seconds : 0;
@@ -234,7 +252,17 @@ export default function SessionPage() {
                         }
 
                         setRecording(true);
-                        speechRef.current?.start();
+                        finalSpeechRef.current = "";
+                        setTranscript("", "");
+                        if (speechRef.current) {
+                            try {
+                                speechRunningRef.current = true;
+                                speechRef.current.start();
+                            } catch {
+                                speechRunningRef.current = false;
+                                setSpeechAvailable(false);
+                            }
+                        }
                         start();
                     }}
                     onStop={handleStop}
