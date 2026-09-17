@@ -7,14 +7,17 @@ class Session(SQLModel, table=True):
     user_id:            str           = Field(index=True)
     created_at:         datetime      = Field(default_factory=datetime.utcnow)
     duration_seconds:   float         = 0.0
-    posture_score:      float         = 0.0
-    eye_contact_percent:float         = 0.0
-    engagement_score:   float         = 0.0
-    fidget_score:       float         = 0.0
-    words_per_minute:   float         = 0.0
-    filler_count:       int           = 0
-    voice_confidence:   float         = 0.0
-    is_monotone:        bool          = False
+    mode:               str           = "general"
+    language:           str           = "auto"
+    posture_score:      Optional[float] = None
+    eye_contact_percent:Optional[float] = None
+    engagement_score:   Optional[float] = None
+    gesture_activity:   Optional[float] = None
+    words_per_minute:   Optional[float] = None
+    filler_count:       Optional[int] = None
+    voice_confidence:   Optional[float] = None
+    is_monotone:        Optional[bool] = None
     transcript:         Optional[str] = None
     coaching_feedback:  Optional[str] = None
-    overall_score:      float         = 0.0
+    analysis_json:      Optional[str] = None
+    overall_score:      Optional[float] = None

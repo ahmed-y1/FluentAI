@@ -1,8 +1,11 @@
+import Link from "next/link";
+
 interface S {
     id: number;
     created_at: string;
-    overall_score: number;
+    overall_score: number | null;
     duration_seconds: number;
+    mode?: string;
 }
 
 export default function SessionHistory({ sessions }: { sessions: S[] }) {
@@ -19,17 +22,17 @@ export default function SessionHistory({ sessions }: { sessions: S[] }) {
             <h2 className="text-white font-semibold mb-4">Session History</h2>
             <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
                 {sessions.map((s) => (
-                    <div key={s.id} className="flex items-center justify-between p-3 bg-gray-800 rounded-xl">
+                    <Link key={s.id} href={`/session/review?id=${s.id}`} className="flex items-center justify-between p-3 bg-gray-800 rounded-xl">
                         <div>
                             <p className="text-white text-sm font-medium">
                                 {new Date(s.created_at).toLocaleDateString("en-GB", { weekday: "short", month: "short", day: "numeric" })}
                             </p>
-                            <p className="text-gray-400 text-xs">{Math.ceil(s.duration_seconds / 60)} min session</p>
+                            <p className="text-gray-400 text-xs">{s.mode ?? "general"} - {Math.ceil(s.duration_seconds / 60)} min session</p>
                         </div>
-                        <p className="text-2xl font-semibold" style={{ color: s.overall_score >= 75 ? "#6366F1" : s.overall_score >= 50 ? "#818CF8" : "#0F172A" }}>
-                            {Math.round(s.overall_score)}
+                        <p className="text-2xl font-semibold" style={{ color: s.overall_score !== null && s.overall_score >= 75 ? "#6366F1" : s.overall_score !== null && s.overall_score >= 50 ? "#818CF8" : "#0F172A" }}>
+                            {s.overall_score === null ? "Unavailable" : Math.round(s.overall_score)}
                         </p>
-                    </div>
+                        </Link>
                 ))}
             </div>
         </div>

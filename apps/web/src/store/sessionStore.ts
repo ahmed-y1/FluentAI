@@ -19,12 +19,15 @@ export interface SessionState {
   presenceScore: MetricValue;
   engagementScore: MetricValue;
   gestureActivity: MetricValue;
-  fidgetScore: MetricValue;
   wordsPerMinute: MetricValue;
   fillerCount: MetricValue;
   voiceConfidence: MetricValue;
   isMonotone: boolean | null;
   transcript: string;
+  interimTranscript: string;
+  mode: "presentation" | "interview" | "general" | "green";
+  language: "en" | "ar" | "auto";
+  analysis: Record<string, unknown> | null;
   coachingFeedback: string | null;
   overallScore: MetricValue;
   diagnostics: Record<string, AnalysisDiagnostic>;
@@ -33,15 +36,18 @@ export interface SessionState {
   setDiagnostic: (name: string, diagnostic: AnalysisDiagnostic) => void;
   setRecording: (value: boolean) => void;
   setFeedback: (text: string) => void;
+  setTranscript: (finalText: string, interimText?: string) => void;
+  setMode: (mode: SessionState["mode"]) => void;
+  setLanguage: (language: SessionState["language"]) => void;
   reset: () => void;
 }
 
 export type MetricKey =
   | "postureScore" | "eyeContactPercent" | "presenceScore" | "engagementScore"
-  | "gestureActivity" | "fidgetScore" | "wordsPerMinute" | "fillerCount"
+  | "gestureActivity" | "wordsPerMinute" | "fillerCount"
   | "voiceConfidence" | "isMonotone" | "transcript" | "overallScore";
 
-const defaults: Omit<SessionState, "setMetric" | "setPhase" | "setDiagnostic" | "setRecording" | "setFeedback" | "reset"> = {
+const defaults: Omit<SessionState, "setMetric" | "setPhase" | "setDiagnostic" | "setRecording" | "setFeedback" | "setTranscript" | "setMode" | "setLanguage" | "reset"> = {
   phase: "idle",
   isRecording: false,
   postureScore: null,
@@ -49,12 +55,15 @@ const defaults: Omit<SessionState, "setMetric" | "setPhase" | "setDiagnostic" | 
   presenceScore: null,
   engagementScore: null,
   gestureActivity: null,
-  fidgetScore: null,
   wordsPerMinute: null,
   fillerCount: null,
   voiceConfidence: null,
   isMonotone: null,
   transcript: "",
+  interimTranscript: "",
+  mode: "general",
+  language: "auto",
+  analysis: null,
   coachingFeedback: null,
   overallScore: null,
   diagnostics: {},
@@ -67,5 +76,8 @@ export const useSessionStore = create<SessionState>((set) => ({
   setDiagnostic: (name, diagnostic) => set((state) => ({ diagnostics: { ...state.diagnostics, [name]: diagnostic } })),
   setRecording: (value) => set({ isRecording: value, phase: value ? "recording" : "idle" }),
   setFeedback: (text) => set({ coachingFeedback: text }),
+  setTranscript: (transcript, interimTranscript = "") => set({ transcript, interimTranscript }),
+  setMode: (mode) => set({ mode }),
+  setLanguage: (language) => set({ language }),
   reset: () => set((state) => ({ ...defaults, diagnostics: state.diagnostics })),
 }));

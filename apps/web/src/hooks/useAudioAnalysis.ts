@@ -64,7 +64,7 @@ export function useAudioAnalysis() {
     });
   };
 
-  const stopAndAnalyze = (): Promise<Record<string, unknown> | null> =>
+  const stopAndAnalyze = (language: "en" | "ar" | "auto" = "auto"): Promise<Record<string, unknown> | null> =>
     new Promise((resolve) => {
       // If recorder was never started, return immediately
       if (!recRef.current || recRef.current.state === "inactive") {
@@ -75,9 +75,10 @@ export function useAudioAnalysis() {
         const blob = new Blob(chunks.current, { type: "audio/webm" });
         const form = new FormData();
         form.append("audio", blob, "session.webm");
+        form.append("language", language);
         
         try {
-          const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://fluent-ai-backend.onrender.com";
           const res = await fetch(`${baseUrl}/api/audio/analyze`, {
             method: "POST",
             body: form,

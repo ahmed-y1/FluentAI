@@ -2,7 +2,7 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
 interface Props {
-    sessions: { date: string; overall: number; posture: number; eyeContact: number }[];
+    sessions: { date: string; overall: number | null; posture: number | null; eyeContact: number | null }[];
 }
 
 export default function ScoreChart({ sessions }: Props) {
@@ -19,7 +19,7 @@ export default function ScoreChart({ sessions }: Props) {
     if (sessions.length === 1) {
         return (
             <div className="bg-gray-900 rounded-2xl p-6 text-center py-8">
-                <p className="text-gray-300 text-2xl font-semibold">{sessions[0].overall}/100</p>
+                <p className="text-gray-300 text-2xl font-semibold">{sessions[0].overall === null ? "Unavailable" : `${sessions[0].overall}/100`}</p>
                 <p className="text-gray-400 mt-1">First session score — complete more to see your trend.</p>
             </div>
         );

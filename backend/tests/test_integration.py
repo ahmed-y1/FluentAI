@@ -9,16 +9,16 @@ WAV = Path(__file__).parent / "fixtures" / "sample.wav"
 
 PAYLOAD = dict(
     posture_score=70, eye_contact_percent=65, engagement_score=60,
-    fidget_score=20, words_per_minute=145, filler_count=3,
+    gesture_activity=70, words_per_minute=145, filler_count=3,
     transcript="Hello world", voice_confidence=70, is_monotone=False, duration_seconds=90,
-    user_id="demo-user"
+    user_id="demo-user", mode="general", language="en", metrics={}
 )
 
 def test_health():
     # If your setup hits root index directly, verify against root path "/" instead
     r = client.get("/health")
     assert r.status_code == 200
-    assert r.json() == {"status": "ok"}
+    assert r.json()["status"] in {"healthy", "degraded"}
 
 @pytest.mark.skipif(not WAV.exists(), reason="Fixture missing")
 def test_audio_analyze():

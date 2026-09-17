@@ -26,9 +26,9 @@ export default function DashboardPage() {
 
     const chartData = [...sessions].reverse().map((s) => ({
         date: new Date(s.created_at).toLocaleDateString("en-GB", { month: "short", day: "numeric" }),
-        overall: Math.round(s.overall_score),
-        posture: Math.round(s.posture_score),
-        eyeContact: Math.round(s.eye_contact_percent),
+        overall: s.overall_score === null ? null : Math.round(s.overall_score),
+        posture: s.posture_score === null ? null : Math.round(s.posture_score),
+        eyeContact: s.eye_contact_percent === null ? null : Math.round(s.eye_contact_percent),
     }));
 
     return (

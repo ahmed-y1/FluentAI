@@ -1,4 +1,4 @@
-export default function CoachingCard({ feedback, score }: { feedback: string | null; score: number }) {
+export default function CoachingCard({ feedback, score }: { feedback: string | null; score: number | null }) {
     if (!feedback) return null;
 
     const html = feedback
@@ -15,7 +15,7 @@ export default function CoachingCard({ feedback, score }: { feedback: string | n
         <div className="bg-gray-900 rounded-2xl p-6">
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-white font-semibold">AI Coaching Feedback</h2>
-                <span className="text-2xl font-semibold text-teal-400">{Math.round(score)}/100</span>
+                <span className="text-2xl font-semibold text-teal-400">{score === null ? "Unavailable" : `${Math.round(score)}/100`}</span>
             </div>
             <div
                 className="text-gray-300 text-sm leading-relaxed [&_strong]:text-white [&_li]:ml-4 [&_li]:list-disc [&_li]:mb-1 space-y-2"

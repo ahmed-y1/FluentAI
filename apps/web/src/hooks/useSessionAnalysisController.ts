@@ -135,7 +135,6 @@ export function useSessionAnalysisController(videoRef: React.RefObject<HTMLVideo
             runModel("hands", () => {
                 const result = gestureRef.current!.analyze(video, timestamp);
                 setMetric("gestureActivity", result.gestureActivity);
-                setMetric("fidgetScore", result.fidgetScore);
             });
         }
 

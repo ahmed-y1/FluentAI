@@ -116,3 +116,17 @@ Check browser DevTools > Console for:
 3. **Enable detailed logging:** Check backend console output for specific error messages
 
 4. **Test with curl first:** Before testing from frontend, verify backend endpoint works in isolation
+
+## Analysis and scoring architecture
+
+FluentAI separates three layers:
+
+- **AI/ML:** Whisper speech recognition, browser speech recognition for low-latency interim text, MediaPipe/Face API vision models, and optional Ollama coaching.
+- **Deterministic analysis:** tokenized word count, language-aware filler frequency and rate, timestamp-based speech duration/WPM, pauses, repeated words and phrases, and lexical diversity (type-token ratio).
+- **Application scoring:** `backend/services/session_aggregator.py` normalizes available signals, applies documented mode weights, excludes missing signals from the denominator, and returns scores, contributions, confidence, and evidence.
+
+The selected language (`en`, `ar`, or `auto`) is sent to Whisper. Arabic transcript review uses RTL. Browser recognition is explicitly optional: when unsupported or interrupted, the session remains usable and the backend result is authoritative when available.
+
+Completed sessions are stored locally with their mode, language, transcript, raw metrics, score breakdown, model availability, and nullable values. Older records receive safe defaults for mode/language; missing measurements remain `Unavailable`, never zero. The static deployment uses `/session/review?id=<session-id>` because arbitrary dynamic routes cannot be generated from localStorage during export.
+
+Limitations: Ollama and Whisper require the backend/model setup described above. GREEN mode currently selects climate-focused practice and preserves the selected mode for weighting, but external factual verification and full semantic topic analysis require a configured AI service and are not fabricated when unavailable. Existing TensorFlow duplicate-kernel warnings are non-fatal.

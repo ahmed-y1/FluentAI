@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: fluent-ai-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /health
+    plan: starter
+    envVars:
+      - key: FLUENTAI_WHISPER_MODEL
+        value: tiny
+      - key: FLUENTAI_CORS_ORIGINS
+        sync: false
+      - key: FLUENTAI_LLM_URL
+        sync: false
+      - key: FLUENTAI_LLM_MODEL
+        value: llama3.2:3b

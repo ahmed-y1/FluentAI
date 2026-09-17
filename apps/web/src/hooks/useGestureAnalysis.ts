@@ -48,7 +48,7 @@ export function useGestureAnalysis(videoRef: React.RefObject<HTMLVideoElement | 
       try {
         const nextResult = monitor.current.analyze(video, timestamp);
         setResult(nextResult);
-        setMetric("fidgetScore", nextResult.fidgetScore);
+        setMetric("gestureActivity", nextResult.gestureActivity);
       } catch (error) {
         console.warn("[Hands] Analysis error:", error);
       } finally {

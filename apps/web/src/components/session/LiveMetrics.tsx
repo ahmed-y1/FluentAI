@@ -5,7 +5,6 @@ export default function LiveMetrics() {
     const eye = useSessionStore((s) => s.eyeContactPercent);
     const presence = useSessionStore((s) => s.presenceScore);
     const activity = useSessionStore((s) => s.gestureActivity);
-    const fidget = useSessionStore((s) => s.fidgetScore);
 
     return (
         <div className="space-y-4">
@@ -13,7 +12,6 @@ export default function LiveMetrics() {
             <Bar label="Eye Contact" value={eye} color="#818CF8" />
             <Bar label="Presence" value={presence} color="#6366F1" />
             <Bar label="Gesture Activity" value={activity} color="#818CF8" />
-            <Bar label="Fidgeting" value={fidget} color="#0F172A" />
         </div>
     );
 }

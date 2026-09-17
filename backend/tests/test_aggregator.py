@@ -2,7 +2,7 @@ from services.session_aggregator import SessionSummary
 
 DEFAULTS = dict(
     posture_score=80, eye_contact_percent=70, engagement_score=75,
-    fidget_score=10, words_per_minute=140, filler_count=0,
+    gesture_activity=70, words_per_minute=140, filler_count=0,
     transcript="test", voice_confidence=80, is_monotone=False, duration_seconds=60
 )
 
@@ -24,5 +24,10 @@ def test_ideal_wpm_range_no_penalty():
     assert score_120 == score_160  # both ideal
     assert score_100 < score_120   # 100 wpm penalised
 
-def test_high_fidget_reduces_score():
-    assert mk(fidget_score=0).compute_overall_score() > mk(fidget_score=100).compute_overall_score()
+def test_gesture_activity_is_scored_when_available():
+    assert mk(gesture_activity=100).compute_overall_score() > mk(gesture_activity=20).compute_overall_score()
+
+def test_missing_metrics_are_not_zero():
+    result = mk(posture_score=None, eye_contact_percent=None).score_breakdown()
+    assert result["overall_score"] is not None
+    assert "posture" not in result["available_categories"]
