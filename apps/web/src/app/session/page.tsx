@@ -76,9 +76,21 @@ export default function SessionPage() {
                 streamRef.current = stream;
                 setMediaReady(true);
             })
-            .catch((error) => {
-                console.warn("Failed to start camera or microphone:", error);
-                setStartupError("Camera and microphone access is required to start a session.");
+            .catch(async (error) => {
+                console.warn("Camera and microphone access failed; trying microphone-only mode:", error);
+                try {
+                    const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    if (cancelled) {
+                        audioStream.getTracks().forEach((track) => track.stop());
+                        return;
+                    }
+                    streamRef.current = audioStream;
+                    setMediaReady(true);
+                    setStartupError("Camera unavailable. The session can continue with microphone and transcript analysis.");
+                } catch (audioError) {
+                    console.warn("Microphone access failed:", audioError);
+                    setStartupError("Microphone access is required to start a session. Check browser permissions and reload the page.");
+                }
             });
 
         return () => {
@@ -93,7 +105,7 @@ export default function SessionPage() {
         setPhase("processing");
 
         speechRef.current?.stop();
-        const audio = await stopAndAnalyze(language);
+        const audio = await stopAndAnalyze(language, useSessionStore.getState().transcript);
         if (!audio) {
             setStartupError("The session could not be finalized. Please try again.");
             return;
@@ -140,7 +152,7 @@ export default function SessionPage() {
 
         let coachingFeedback = "AI Coaching unavailable. Connect the FluentAI backend to receive evidence-based feedback.";
         try {
-            const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://fluent-ai-backend.onrender.com";
+            const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
             const backendPayload = {
                 user_id: "demo-user",
                 posture_score: state.postureScore,

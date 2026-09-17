@@ -64,7 +64,7 @@ export function useAudioAnalysis() {
     });
   };
 
-  const stopAndAnalyze = (language: "en" | "ar" | "auto" = "auto"): Promise<Record<string, unknown> | null> =>
+  const stopAndAnalyze = (language: "en" | "ar" | "auto" = "auto", fallbackTranscript = ""): Promise<Record<string, unknown> | null> =>
     new Promise((resolve) => {
       // If recorder was never started, return immediately
       if (!recRef.current || recRef.current.state === "inactive") {
@@ -78,7 +78,7 @@ export function useAudioAnalysis() {
         form.append("language", language);
         
         try {
-          const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://fluent-ai-backend.onrender.com";
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
           const res = await fetch(`${baseUrl}/api/audio/analyze`, {
             method: "POST",
             body: form,
@@ -92,16 +92,25 @@ export function useAudioAnalysis() {
           resolve(result);
         } catch (e) {
           console.warn("Audio backend unavailable; speech metrics will be marked unavailable.", e);
+          const tokens = fallbackTranscript.match(/[\p{L}\p{N}']+/gu) ?? [];
+          const fillers = language === "ar"
+            ? new Set(["يعني", "اممم", "اه", "بصراحة", "مثل"])
+            : new Set(["um", "uh", "like", "basically", "literally", "actually", "honestly"]);
+          const fillerCount = tokens.filter((token) => fillers.has(token.toLocaleLowerCase())).length;
+          const durationSeconds = startedAt.current
+            ? Math.round((performance.now() - startedAt.current) / 1000)
+            : 0;
           resolve({
             words_per_minute: null,
-            filler_count: null,
+            filler_count: fallbackTranscript ? fillerCount : null,
+            filler_rate: tokens.length ? Math.round((fillerCount * 100 / tokens.length) * 100) / 100 : null,
+            word_count: fallbackTranscript ? tokens.length : null,
             voice_confidence: null,
-            transcript: "",
+            transcript: fallbackTranscript,
             audio_available: false,
+            transcription_available: Boolean(fallbackTranscript),
             audio_error: "Speech analysis is unavailable because the backend could not be reached.",
-            duration_seconds: startedAt.current
-              ? Math.round((performance.now() - startedAt.current) / 1000)
-              : 0,
+            duration_seconds: durationSeconds,
           });
         } finally {
           recRef.current = null;

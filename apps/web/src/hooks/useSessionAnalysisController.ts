@@ -50,6 +50,9 @@ export function useSessionAnalysisController(videoRef: React.RefObject<HTMLVideo
                 setDiagnostic(name, { status: "loading", framesProcessed: 0 });
                 try {
                     await init();
+                    if (name === "pose") poseRef.current = nextPose;
+                    if (name === "face") eyeRef.current = nextEye;
+                    if (name === "hands") gestureRef.current = nextGesture;
                     setDiagnostic(name, { status: "ready", framesProcessed: 0 });
                     return true;
                 } catch (error) {
@@ -60,15 +63,12 @@ export function useSessionAnalysisController(videoRef: React.RefObject<HTMLVideo
             }));
 
             if (cancelled) return;
-            if (results.every(Boolean)) {
-                poseRef.current = nextPose;
-                eyeRef.current = nextEye;
-                gestureRef.current = nextGesture;
+            if (results.some(Boolean)) {
                 setStatus({ isReady: true, initializing: false, error: null });
                 setPhase("ready");
             } else {
-                setStatus({ isReady: false, initializing: false, error: "One or more vision models could not be loaded." });
-                setPhase("error");
+                setStatus({ isReady: true, initializing: false, error: "Vision models are unavailable. Audio and live transcription can still be used." });
+                setPhase("ready");
             }
         };
 
