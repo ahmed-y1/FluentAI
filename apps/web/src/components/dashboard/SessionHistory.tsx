@@ -32,7 +32,7 @@ export default function SessionHistory({ sessions }: { sessions: S[] }) {
                         <p className="text-2xl font-semibold" style={{ color: s.overall_score !== null && s.overall_score >= 75 ? "#6366F1" : s.overall_score !== null && s.overall_score >= 50 ? "#818CF8" : "#0F172A" }}>
                             {s.overall_score === null ? "Unavailable" : Math.round(s.overall_score)}
                         </p>
-                        </Link>
+                    </Link>
                 ))}
             </div>
         </div>
