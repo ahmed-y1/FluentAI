@@ -1,107 +1,39 @@
 # Free public demo deployment
 
-## Fast demo checklist
+## Permanent QR link
 
-Use four PowerShell windows. Replace the two generated tunnel URLs where shown.
-
-**Window 1 - backend**
-
-```powershell
-cd C:\Users\Student\fluent-ai\backend
-python -m uvicorn main:app --host 0.0.0.0 --port 8000
-```
-
-**Window 2 - backend tunnel**
-
-```powershell
-cd $HOME\Downloads
-.\cloudflared-windows-amd64.exe tunnel --protocol http2 --url http://localhost:8000
-```
-
-Copy the `https://...trycloudflare.com` URL into `apps/web/.env.local`:
+Use this stable URL for the final QR code:
 
 ```text
-NEXT_PUBLIC_API_URL=https://BACKEND-TUNNEL.trycloudflare.com
+https://ahmed-y1.github.io/FluentAI/
 ```
 
-**Window 3 - frontend**
+This is the completely free static demo. It does not require Cloudflare,
+PowerShell, your laptop, or a running FastAPI server. The GitHub Pages workflow
+builds the frontend with no backend URL, so unavailable server capabilities are
+shown honestly while browser camera, vision, live speech recognition, and local
+session storage can still work.
+
+To publish updates, push to the `master` branch, then check **GitHub -> Actions
+-> Deploy web app to GitHub Pages**. In repository **Settings -> Pages**, set
+the source to **GitHub Actions**. The first deployment may take a few minutes.
+
+Use the Cloudflare instructions below only for a laptop-hosted backend demo; do
+not use its changing URL for the permanent QR code.
+
+## Fast demo checklist
+
+The fastest option is now one command from the repository root:
 
 ```powershell
 cd C:\Users\Student\fluent-ai
-npm --workspace web run dev
+npm run demo
 ```
 
-**Window 4 - frontend tunnel**
+The launcher finds `cloudflared` in Downloads, starts FastAPI and Next.js,
+creates both HTTP/2 tunnels, updates `apps/web/.env.local`, configures CORS, and
+prints the frontend URL to use for the QR code. Keep the launched windows open.
+Stop everything with `Ctrl+C` in the launcher window.
 
-```powershell
-cd $HOME\Downloads
-.\cloudflared-windows-amd64.exe tunnel --protocol http2 --url http://localhost:3000
-```
-
-Copy the frontend URL, then restart Window 1 with CORS enabled:
-
-```powershell
-cd C:\Users\Student\fluent-ai\backend
-$env:FLUENTAI_CORS_ORIGINS="https://FRONTEND-TUNNEL.trycloudflare.com,http://localhost:3000"
-python -m uvicorn main:app --host 0.0.0.0 --port 8000
-```
-
-Open the frontend tunnel URL on the phone and allow camera/microphone access.
-Use that frontend URL for the QR code. Keep all four windows open. If code
-changes, restart Window 3 and refresh the phone page.
-
-Use GitHub Pages for the frontend. It is completely free, and visitors only scan
-the QR code and use a browser. Your laptop does not need to stay on.
-
-If your laptop can remain on, use two free Cloudflare Quick Tunnels. This gives
-phones an HTTPS URL while the backend stays on your laptop.
-
-1. Install `cloudflared` on the laptop from
-   https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/.
-2. Start the backend:
-
-```powershell
-cd backend
-python -m uvicorn main:app --host 0.0.0.0 --port 8000
-```
-
-3. In a second terminal, expose the backend:
-
-```powershell
-cloudflared tunnel --protocol http2 --url http://localhost:8000
-```
-
-Copy the generated `https://....trycloudflare.com` backend URL.
-
-4. In `apps/web/.env.local`, set:
-
-```text
-NEXT_PUBLIC_API_URL=https://YOUR-BACKEND.trycloudflare.com
-```
-
-5. Start the frontend:
-
-```powershell
-npm --workspace web run dev
-```
-
-6. In another terminal, expose the frontend:
-
-```powershell
-cloudflared tunnel --protocol http2 --url http://localhost:3000
-```
-
-Copy the generated frontend URL. Stop the original backend with `Ctrl+C`, then
-restart it with the frontend origin:
-
-```powershell
-$env:FLUENTAI_CORS_ORIGINS="https://YOUR-FRONTEND.trycloudflare.com"
-python -m uvicorn main:app --host 0.0.0.0 --port 8000
-```
-
-7. Scan the generated frontend `https://....trycloudflare.com` URL. Keep all
-   terminals and the laptop running during the demo.
-
-Quick Tunnel URLs change whenever they restart. Generate the QR code only after
-both tunnels are running. Open the backend `/health` URL once before the demo
-and test the full flow from a phone.
+If the launcher reports that cloudflared is missing, put
+`cloudflared-windows-amd64.exe` in `C:\Users\Student\Downloads`.

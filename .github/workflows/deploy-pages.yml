@@ -37,7 +37,8 @@ jobs:
       - name: Build static site
         env:
           NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
-          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
+          # Leave empty for the permanent free static demo. Browser fallbacks remain available.
+          NEXT_PUBLIC_API_URL: ""
         run: npm run build
 
       - name: Upload Pages artifact
